@@ -1,0 +1,19 @@
+{
+  "name": "uploadaqrquivos",
+  "version": "1.0.0",
+  "description": "Upload de arquivos das aplicacoes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Osmar Junior",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "config": "^3.3.12",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
