@@ -1,8 +1,8 @@
-### API PRINCIPAL
-/bin
-/obj
+### API PRINCIPAL**
+**/bin
+**/obj
 
 
 ### API ARQUIVOS
-/node_modules
-/uploads
+**/node_modules
+**/uploads
