@@ -15,6 +15,11 @@ builder.Services.AddSwaggerGen(
 builder.Services.AddDbContext<ContaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddHttpClient("Upload", client => {
+    client.BaseAddress = new Uri("http://localhost:3008/api/v1/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment()) {
@@ -122,6 +127,9 @@ app.MapDelete("/conta/{id}", async (ContaDbContext context, Guid id) => {
 /*
     INTEGRACAO COM API DE UPLOAD DE ARQUIVOS
 */
+app.MapPost("/upload-arquivos", (ContaDbContext context) => {
+    
+});
 #endregion
 
 #region Autenticacao
