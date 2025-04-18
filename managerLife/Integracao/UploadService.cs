@@ -1,9 +1,13 @@
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+using System.Net.Http.Headers;
 
 namespace Integracao.UploadService
 {
-    public class UploadService 
+    public interface IUploadService 
+    {
+        Task<string> Upload(string id, IFormFileCollection arquivos);
+         
+    }
+    public class UploadService : IUploadService
     {
         private readonly IHttpClientFactory _httpClientFactory;
         public UploadService(IHttpClientFactory httpClientFactory)
@@ -11,14 +15,24 @@ namespace Integracao.UploadService
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<string> Upload(string id, List<IFormFile> arquivos)
+        public async Task<string> Upload(string id, IFormFileCollection arquivos) 
         {
-            using (var HttpClient client = _httpClientFactory.CreateClient("Upload")) 
+              using (HttpClient client = _httpClientFactory.CreateClient("Upload")) 
             {
-                var response = await client.PostAsync($"/api/v1/upload/{id}", arquivos);
+                var multipartContent = new MultipartFormDataContent();
+                Console.WriteLine($"Subindo Arquivo {arquivos}");
+                foreach (var file in arquivos) {
+                    var fileContent = new StreamContent(file.OpenReadStream());
+
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+                    multipartContent.Add(fileContent, "foto", file.FileName);
+                }
+                
+                var response = await client.PostAsync($"/api/v1/upload/{id}", multipartContent);
 
                 if (response.IsSuccessStatusCode) {
-                    var result = await response.Content.ReadAsStringAsync();
+                    return response.ReasonPhrase ?? "Upload de arquvivos feita com Sucesso!";
                 }
             }
 

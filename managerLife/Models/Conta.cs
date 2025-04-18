@@ -11,7 +11,7 @@ namespace Models.Contas
         [MaxLength(255)]
         public required string Cobrador { get; set;}
         
-        public required Categoria Categoria { get; set;}
+        public virtual required Categoria Categoria { get; set;}
 
         public required double Total { get; set;}
 

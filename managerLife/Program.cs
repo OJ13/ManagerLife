@@ -2,15 +2,19 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Models.ContaDb;
 using Models.Contas;
+using Integracao.UploadService;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAntiforgery();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(
-        options => {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "Manager Home Life", Description = "Manager da Casa como um Todo", Version = "v1"});	
-        }
-    );
+    options => {
+        options.SwaggerDoc("v1", new OpenApiInfo { Title = "Manager Home Life", Description = "Manager da Casa como um Todo", Version = "v1"});	
+    }
+);
 
 builder.Services.AddDbContext<ContaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -20,7 +24,10 @@ builder.Services.AddHttpClient("Upload", client => {
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
+builder.Services.AddSingleton<IUploadService, UploadService>();
+
 var app = builder.Build();
+app.UseAntiforgery();
 
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
@@ -117,19 +124,25 @@ app.MapDelete("/conta/{id}", async (ContaDbContext context, Guid id) => {
     return Results.Ok();
 });
 
-// app.MapPost("/files", (object arquvivos) => {
-// INTEGRACAO de ARQUIVOS
-// });
-
 #endregion
 
 #region UploadArquivos
-/*
-    INTEGRACAO COM API DE UPLOAD DE ARQUIVOS
-*/
-app.MapPost("/upload-arquivos", (ContaDbContext context) => {
+
+app.MapPost("/upload-arquivos/{id}", 
+    async ([FromForm] IFormFileCollection  files, 
+     [FromRoute] string id, 
+     [FromServices] IUploadService uploadService) => {
+
+    if (files == null || files.Count == 0)
+            return Results.BadRequest("Nao ha Arquivos");
     
-});
+    var arquivosEnviados = await uploadService.Upload(id, files);
+    
+    Console.WriteLine($"Arquivos enviados {arquivosEnviados}");
+
+    return Results.Ok(arquivosEnviados);
+}).DisableAntiforgery();
+
 #endregion
 
 #region Autenticacao
